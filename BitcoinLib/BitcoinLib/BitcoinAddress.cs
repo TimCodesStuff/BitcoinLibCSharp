@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text.RegularExpressions;
 
 namespace BitcoinLib
 {
@@ -114,8 +115,25 @@ namespace BitcoinLib
             if(privateKey.Length != 32) {
                 return (null, $"Private key has invalid length of {privateKey.Length}, expected length of 32.");
             }
-
             return (new BitcoinAddress(privateKey, network), "Success.");
+        }
+
+        public static (BitcoinAddress, string) CreateAddressFromPrivateKeyHex(string privateKeyHex, NetworkType network)
+        {
+            if (privateKeyHex.Length != 64){
+                return (null, $"Private key hex string has invalid length of {privateKeyHex.Length}, expected length of 64.");
+            }
+            if (!(new Regex(@"^[0-9a-f]+$").Match(privateKeyHex.ToLowerInvariant()).Success))
+            {
+                return (null, "Private key is not in hexadecimal format. Unexpected character in string.");
+            }
+            return (new BitcoinAddress(Encoding.HexStringToByteArray(privateKeyHex), network), "Success.");
+        }
+
+        public static (BitcoinAddress, string) CreateAddressFromPrivateKeyWIF(string privateKeyWIF, NetworkType network)
+        {
+            //TODO: Check that the WIF format is correct using the checksum
+            return (new BitcoinAddress(Encoding.HexStringToByteArray(Encoding.WIFtoHex(privateKeyWIF)), network), "Success.");
         }
     }
 
