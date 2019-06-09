@@ -1,4 +1,9 @@
-﻿using System;
+﻿using Org.BouncyCastle.Asn1.Sec;
+using Org.BouncyCastle.Asn1.X9;
+using Org.BouncyCastle.Crypto.Parameters;
+using Org.BouncyCastle.Math;
+using System;
+using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace BitcoinLib
@@ -22,18 +27,7 @@ namespace BitcoinLib
 
         NetworkType NetworkByte;
 
-        byte[] PublicKeyFull
-        {
-            get
-            {
-                byte[] publicKey = new byte[65];
-                publicKey[0] = 0x04;
-                publicKeyX.CopyTo(publicKey, 1);
-                publicKeyY.CopyTo(publicKey, 33);
-                return publicKey;
-            }
-        }
-
+        public byte[] PublicKeyFull { get; private set; }
         public string PrivateKey { get; private set; }
         public string PrivateKeyWIF { get; private set; }
         public string P2PKHAddress { get; private set; }
@@ -47,9 +41,10 @@ namespace BitcoinLib
             PrivateKey = Encoding.ByteArrayToHexString(privateKey);
             PrivateKeyWIF = Encoding.HexToWif(Encoding.ByteArrayToHexString(privateKey));
 
-            (publicKeyX, publicKeyY) = Bitcoin.GetSecp256k1PublicKey(privateKey);
+            (publicKeyX, publicKeyY) = GetSecp256k1PublicKey(privateKey);
 
-            publicKeyCompressed = Bitcoin.GenerateCompressedPublicKey(publicKeyX, publicKeyY);
+            PublicKeyFull = GenerateFullPublicKey(publicKeyX, publicKeyY);
+            publicKeyCompressed = GenerateCompressedPublicKey(publicKeyX, publicKeyY);
             publicKeySha256 = Crypto.Sha256(publicKeyCompressed);
             publicKeySha256Ripe = Crypto.RipeMD160(publicKeySha256);
 
@@ -58,7 +53,7 @@ namespace BitcoinLib
             p2pkh_publicKeyWithNetworkByte[0] = (byte)networkByte;
             publicKeySha256Ripe.CopyTo(p2pkh_publicKeyWithNetworkByte, 1);
 
-            p2pkh_checksum = Bitcoin.GenerateChecksum(p2pkh_publicKeyWithNetworkByte);
+            p2pkh_checksum = GenerateChecksum(p2pkh_publicKeyWithNetworkByte);
 
             p2pkh_addressWithChecksum = new byte[25];
             p2pkh_publicKeyWithNetworkByte.CopyTo(p2pkh_addressWithChecksum, 0);
@@ -68,24 +63,49 @@ namespace BitcoinLib
 
             // Build p2sh address
             p2sh_publicKeyWithNetworkByte = new byte[21];
-            if (networkByte == NetworkType.Main)
-            {
-                p2sh_publicKeyWithNetworkByte[0] = 0x05;
-            }
-            else
-            {
-                p2sh_publicKeyWithNetworkByte[0] = 0xc4;
-            }
+            p2sh_publicKeyWithNetworkByte[0] = (networkByte == NetworkType.Main) ? (byte)0x05 : (byte)0xc4;
 
             publicKeySha256Ripe.CopyTo(p2sh_publicKeyWithNetworkByte, 1);
-            p2sh_checksum = Bitcoin.GenerateChecksum(p2sh_publicKeyWithNetworkByte);
+            p2sh_checksum = GenerateChecksum(p2sh_publicKeyWithNetworkByte);
 
             p2sh_addressWithChecksum = new byte[25];
             p2sh_publicKeyWithNetworkByte.CopyTo(p2sh_addressWithChecksum, 0);
             p2sh_checksum.CopyTo(p2sh_addressWithChecksum, 21);
 
             P2SHAddress = Encoding.Base58Encode(p2sh_addressWithChecksum);
+        }
 
+        private static byte[] GenerateFullPublicKey(byte[] publicKeyX, byte[] publicKeyY)
+        {
+            byte[] fullPublicKey = new byte[65];
+            fullPublicKey[0] = 0x04;
+            publicKeyX.CopyTo(fullPublicKey, 1);
+            publicKeyY.CopyTo(fullPublicKey, 33);
+            return fullPublicKey;
+        }
+
+        private static byte[] GenerateCompressedPublicKey(byte[] publicKeyX, byte[] publicKeyY)
+        {
+            byte[] publicKey = new byte[33];
+            publicKey[0] = (publicKeyY[31] % 2 == 0) ? (byte)0x02 : (byte)0x03;
+            publicKeyX.CopyTo(publicKey, 1);
+            return publicKey;
+        }
+
+        private static (byte[], byte[]) GetSecp256k1PublicKey(byte[] privateKey)
+        {
+            X9ECParameters curve = SecNamedCurves.GetByName("secp256k1");
+            ECDomainParameters domain = new ECDomainParameters(curve.Curve, curve.G, curve.N, curve.H);
+            BigInteger d = new BigInteger(+1, privateKey);
+
+            var publicKey = new ECPublicKeyParameters(domain.G.Multiply(d), domain);
+            return (publicKey.Q.XCoord.GetEncoded(), publicKey.Q.YCoord.GetEncoded());
+        }
+
+        private static byte[] GenerateChecksum(byte[] address)
+        {
+            byte[] doubleSha = Crypto.Sha256(Crypto.Sha256(address));
+            return doubleSha.Take(4).ToArray();
         }
 
         public string AddressInfo()
