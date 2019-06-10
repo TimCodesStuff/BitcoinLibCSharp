@@ -155,6 +155,11 @@ namespace BitcoinLib
             //TODO: Check that the WIF format is correct using the checksum
             return (new BitcoinAddress(Encoding.HexStringToByteArray(Encoding.WIFtoHex(privateKeyWIF)), network), "Success.");
         }
+
+        public static BitcoinAddress CreateRandomAddress(NetworkType network)
+        {
+            return new BitcoinAddress(Crypto.GenerateRandECDSACompliant256BitKey(), network);
+        }
     }
 
     public enum NetworkType
