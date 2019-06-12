@@ -32,10 +32,11 @@ namespace BitcoinLib
             return hex.Substring(2, 64);
         }
 
-        public static string HexToWif(string hex, bool isCompressedPublicKey = true)
+        public static string HexToWif(string hex, NetworkType network, bool isCompressedPublicKey = true)
         {
             //TODO: Verify string is Hex and correct length.
-            hex = "80" + hex;
+            hex = (network == NetworkType.Main) ? "80" + hex : "EF" + hex;
+
             if (isCompressedPublicKey)
             {
                 hex += "01";
@@ -44,6 +45,28 @@ namespace BitcoinLib
             string checksum = ByteArrayToHexString(doubleSha).Substring(0, 8);
             hex += checksum;
             return Base58Encode(HexStringToByteArray(hex));
+        }
+
+        public static (string, string, string) DecomposeWifAddress(string wifKey)
+        {
+            // Base58 decode
+            string hex = Encoding.ByteArrayToHexString(Base58Decode(wifKey));
+
+            //TODO: Check if WIF was used for compressed public key.
+
+            string network = hex.Substring(0, 2);
+            string wif = hex.Substring(2, 64);
+            string checksum = hex.Substring(68, 8);
+
+            return (network, wif, checksum);
+        }
+
+        public static bool ValidateWifAddressChecksum(string wifKey)
+        {
+            (string network, string hex, string wifChecksum) = Encoding.DecomposeWifAddress(wifKey);
+            byte[] doubleSha = Crypto.Sha256(Crypto.Sha256(HexStringToByteArray(network + hex + "01")));
+            string checksum = ByteArrayToHexString(doubleSha).Substring(0, 8);
+            return checksum == wifChecksum;
         }
 
         // Base 58 contains no 0, O, l, or I.

@@ -39,7 +39,7 @@ namespace BitcoinLib
 
             this.privateKey = privateKey;
             PrivateKey = Encoding.ByteArrayToHexString(privateKey);
-            PrivateKeyWIF = Encoding.HexToWif(Encoding.ByteArrayToHexString(privateKey));
+            PrivateKeyWIF = Encoding.HexToWif(Encoding.ByteArrayToHexString(privateKey), networkByte);
 
             (publicKeyX, publicKeyY) = GetSecp256k1PublicKey(privateKey);
 
@@ -152,7 +152,10 @@ namespace BitcoinLib
 
         public static (BitcoinAddress, string) CreateAddressFromPrivateKeyWIF(string privateKeyWIF, NetworkType network)
         {
-            //TODO: Check that the WIF format is correct using the checksum
+            if (!Encoding.ValidateWifAddressChecksum(privateKeyWIF)){
+                return (null, "WIF private key did not pass checksum test.");
+            }
+
             return (new BitcoinAddress(Encoding.HexStringToByteArray(Encoding.WIFtoHex(privateKeyWIF)), network), "Success.");
         }
 

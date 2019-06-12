@@ -76,6 +76,13 @@ namespace BitcoinLibUnitTests
             Assert.AreEqual(address.P2SHAddress, "3Q3zY87DrUmE371Grgc7bsDiVPqpu4mN1f");
         }
 
-        //TODO: Add more tests once WIF validation is implemented.
+        [TestMethod]
+        public void InvalidPrivateKeyWIFChecksum()
+        {
+            // Changed last character from "C" to "D" to modify checksum.
+            (BitcoinAddress address, String result) = BitcoinAddress.CreateAddressFromPrivateKeyWIF("Kx45GeUBSMPReYQwgXiKhG9FzNXrnCeutJp4yjTd5kKxCitadm3D", NetworkType.Main);
+            Assert.IsNull(address);
+            Assert.AreEqual(result, "WIF private key did not pass checksum test.");
+        }
     }
 }
