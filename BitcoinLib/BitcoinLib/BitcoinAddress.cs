@@ -3,7 +3,9 @@ using Org.BouncyCastle.Asn1.X9;
 using Org.BouncyCastle.Crypto.Parameters;
 using Org.BouncyCastle.Math;
 using System;
+using System.IO;
 using System.Linq;
+using System.Net;
 using System.Text.RegularExpressions;
 
 namespace BitcoinLib
@@ -156,12 +158,46 @@ namespace BitcoinLib
                 return (null, "WIF private key did not pass checksum test.");
             }
 
-            return (new BitcoinAddress(Encoding.HexStringToByteArray(Encoding.WIFtoHex(privateKeyWIF)), network), "Success.");
+            return (new BitcoinAddress(Encoding.HexStringToByteArray(Encoding.WiftoHex(privateKeyWIF)), network), "Success.");
         }
 
         public static BitcoinAddress CreateRandomAddress(NetworkType network)
         {
             return new BitcoinAddress(Crypto.GenerateRandECDSACompliant256BitKey(), network);
+        }
+
+        public static double GetReceivedByAddress(string address)
+        {
+            double value;
+
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create($"https://blockchain.info/q/getreceivedbyaddress/{address}");
+            using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+            using (Stream stream = response.GetResponseStream())
+            using (StreamReader reader = new StreamReader(stream))
+            {
+                if (!double.TryParse(reader.ReadToEnd(), out value))
+                {
+                    value = -1;
+                }
+            }
+            return value;
+        }
+
+        public static double GetAddressBalance(string address)
+        {
+            double value;
+
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create($"https://blockchain.info/q/addressbalance/{address}");
+            using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+            using (Stream stream = response.GetResponseStream())
+            using (StreamReader reader = new StreamReader(stream))
+            {
+                if (!double.TryParse(reader.ReadToEnd(), out value))
+                {
+                    value = -1;
+                }
+            }
+            return value;
         }
     }
 
