@@ -43,10 +43,10 @@ P2PKH Pub key w network byte: 00f54a5851e9372b87810a8e60cdd2e7cfd80b6e31
 P2PKH Checksum:               c7f18fe8
 P2PKH Address Hex:            00f54a5851e9372b87810a8e60cdd2e7cfd80b6e31c7f18fe8
 P2PKH Address Base58:         1PMycacnJaSqwwJqjawXBErnLsZ7RkXUAs
-P2SH Pub key w network byte:  05f54a5851e9372b87810a8e60cdd2e7cfd80b6e31
-P2SH Checksum:                09f2ae6a
-P2SH Address Hex:             05f54a5851e9372b87810a8e60cdd2e7cfd80b6e3109f2ae6a
-P2SH Address Base58:          3Q3zY87DrUmE371Grgc7bsDiVPqpu4mN1f
+P2SH Pub key w network byte:  0014f54a5851e9372b87810a8e60cdd2e7cfd80b6e31
+P2SH Checksum:                e45d708e
+P2SH Address Hex:             0570b4065d87d8ba1bbf82e82227a0d04a36a57c80e45d708e
+P2SH Address Base58:          3BxwGNjvG4CP14tAZodgYyZ7UTjruYDyAM
 ```
 
 You can also generate an address using your own private key. The examples below show how to create an address using a key in Hexadecimal format and also one in WIF format.
