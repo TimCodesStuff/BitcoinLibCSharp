@@ -25,6 +25,7 @@ namespace BitcoinLib
         // pay to script hash
         byte[] p2sh_publicKeyWithNetworkByte;
         byte[] p2sh_checksum;
+        byte[] p2sh_publicKeyHex;
         byte[] p2sh_addressWithChecksum;
 
         NetworkType NetworkByte;
@@ -64,16 +65,15 @@ namespace BitcoinLib
             P2PKHAddress = Encoding.Base58Encode(p2pkh_addressWithChecksum);
 
             // Build p2sh address
-            p2sh_publicKeyWithNetworkByte = new byte[21];
-            p2sh_publicKeyWithNetworkByte[0] = (networkByte == NetworkType.Main) ? (byte)0x05 : (byte)0xc4;
+            p2sh_publicKeyWithNetworkByte = new byte[22];
+            p2sh_publicKeyWithNetworkByte[0] = (byte)networkByte;
+            p2sh_publicKeyWithNetworkByte[1] = 0x14;
 
-            publicKeySha256Ripe.CopyTo(p2sh_publicKeyWithNetworkByte, 1);
-            p2sh_checksum = GenerateChecksum(p2sh_publicKeyWithNetworkByte);
+            publicKeySha256Ripe.CopyTo(p2sh_publicKeyWithNetworkByte, 2);
 
-            p2sh_addressWithChecksum = new byte[25];
-            p2sh_publicKeyWithNetworkByte.CopyTo(p2sh_addressWithChecksum, 0);
-            p2sh_checksum.CopyTo(p2sh_addressWithChecksum, 21);
-
+            p2sh_publicKeyHex = Encoding.HexStringToByteArray(((networkByte == NetworkType.Main) ? "05" : "c4") + Encoding.ByteArrayToHexString(Crypto.RipeMD160(Crypto.Sha256(p2sh_publicKeyWithNetworkByte))));
+            p2sh_checksum = GenerateChecksum(p2sh_publicKeyHex);
+            p2sh_addressWithChecksum = Encoding.HexStringToByteArray(Encoding.ByteArrayToHexString(p2sh_publicKeyHex) + Encoding.ByteArrayToHexString(p2sh_checksum));
             P2SHAddress = Encoding.Base58Encode(p2sh_addressWithChecksum);
         }
 

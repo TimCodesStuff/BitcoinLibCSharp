@@ -22,7 +22,7 @@ namespace BitcoinLibUnitTests
             Assert.AreEqual(address.PrivateKey, "18e14a7b6a307f426a94f8114701e7c8e774e7f9a47e2c2035db29a206321725");
             Assert.AreEqual(address.PrivateKeyWIF, "Kx45GeUBSMPReYQwgXiKhG9FzNXrnCeutJp4yjTd5kKxCitadm3C");
             Assert.AreEqual(address.P2PKHAddress, "1PMycacnJaSqwwJqjawXBErnLsZ7RkXUAs");
-            Assert.AreEqual(address.P2SHAddress, "3Q3zY87DrUmE371Grgc7bsDiVPqpu4mN1f");
+            Assert.AreEqual(address.P2SHAddress, "3BxwGNjvG4CP14tAZodgYyZ7UTjruYDyAM");
         }
 
         [TestMethod]
@@ -44,7 +44,7 @@ namespace BitcoinLibUnitTests
             Assert.IsNotNull(address);
             Assert.AreEqual(address.PrivateKeyWIF, "Kx45GeUBSMPReYQwgXiKhG9FzNXrnCeutJp4yjTd5kKxCitadm3C");
             Assert.AreEqual(address.P2PKHAddress, "1PMycacnJaSqwwJqjawXBErnLsZ7RkXUAs");
-            Assert.AreEqual(address.P2SHAddress, "3Q3zY87DrUmE371Grgc7bsDiVPqpu4mN1f");
+            Assert.AreEqual(address.P2SHAddress, "3BxwGNjvG4CP14tAZodgYyZ7UTjruYDyAM");
         }
 
         [TestMethod]
@@ -73,7 +73,7 @@ namespace BitcoinLibUnitTests
             Assert.IsNotNull(address);
             Assert.AreEqual(address.PrivateKey, "18e14a7b6a307f426a94f8114701e7c8e774e7f9a47e2c2035db29a206321725");
             Assert.AreEqual(address.P2PKHAddress, "1PMycacnJaSqwwJqjawXBErnLsZ7RkXUAs");
-            Assert.AreEqual(address.P2SHAddress, "3Q3zY87DrUmE371Grgc7bsDiVPqpu4mN1f");
+            Assert.AreEqual(address.P2SHAddress, "3BxwGNjvG4CP14tAZodgYyZ7UTjruYDyAM");
         }
 
         [TestMethod]
